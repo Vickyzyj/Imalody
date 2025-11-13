@@ -4,13 +4,16 @@ import base64
 from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel
 from app.services.task_manager import tasks_db  # <-- Import the shared DB
-from huggingface_hub import InferenceClient
+from huggingface_hub import InferenceClient, AsyncInferenceClient
+import logging
+
+logger = logging.getLogger(__name__)
 
 # 1. Create a new ROUTER
 router = APIRouter()
 
 # 2. Initialize the client
-client = InferenceClient()
+client = AsyncInferenceClient()
 
 # 3. Move your Pydantic model here
 class MusicRequest(BaseModel):
@@ -22,9 +25,9 @@ async def call_stable_audio_api(task_id: str, prompt: str):
     try:
         tasks_db[task_id] = {"status": "generating_music"}
 
-        audio_bytes = client.text_to_audio(
-            prompt,
-            model="stabilityai/stable-audio-open-1.0"
+        audio_bytes = await client.text_to_audio(
+            model="stabilityai/stable-audio-open-1.0",
+            prompt=prompt
         )
         
         audio_base64 = base64.b64encode(audio_bytes).decode("utf-8")
@@ -33,6 +36,7 @@ async def call_stable_audio_api(task_id: str, prompt: str):
         tasks_db[task_id] = {"status": "complete", "result": audio_data_url}
 
     except Exception as e:
+        logger.exception("Music generation failed.")
         tasks_db[task_id] = {"status": "failed", "error": str(e)}
 
 # 5. The API endpoint (uses @router, not @app)
