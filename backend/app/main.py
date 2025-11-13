@@ -14,6 +14,10 @@ app = FastAPI(title="Image-to-Music Mock Backend")
 origins = [
     "http://localhost:3000",       # For local-only testing
     "http://localhost:5173",       # For local Vite testing
+    
+    "https://imalody.onrender.com",  # your frontend on Render (if served from same domain)
+    r"https://.*\.ngrok-free\.dev",   # allow any ngrok-free subdomain
+    
     # For ngrok (older URLs)
     "https://*.ngrok.io",
     "http://*.ngrok.io",
@@ -33,6 +37,7 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"https://.*\.ngrok-free\.dev",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
