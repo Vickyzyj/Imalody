@@ -23,7 +23,7 @@ origins = [
 # --- Your CORS Middleware ---
 # We are keeping this from your original file.
 # You may need to add your new Render URL to this list later.
-origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+# origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,7 +34,7 @@ app.add_middleware(
 )
 
 # --- ADD THIS HEALTH CHECK ENDPOINT ---
-@app.get("/", methods=["GET", "HEAD"])
+@app.get("/")
 async def health_check():
     """
     A simple endpoint to let Render's health check know the app is alive.
