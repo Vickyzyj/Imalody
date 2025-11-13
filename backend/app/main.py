@@ -11,6 +11,7 @@ origins = [
     "http://localhost:3000",
     "http://localhost:5173",
     "https://imalody.onrender.com",
+    "https://imalody.vercel.app"
     # Note: allow_origin_regex is not a standard parameter.
     # Let's add all origins explicitly.
     # If your Vercel URL is not static, we can revisit this.
