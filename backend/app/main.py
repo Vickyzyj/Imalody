@@ -8,6 +8,18 @@ from pydantic import BaseModel
 # --- As per plan: Initialize FastAPI App ---
 app = FastAPI(title="Image-to-Music Mock Backend")
 
+
+# --- ADD THIS ENTIRE BLOCK ---
+# This is the list of "origins" (domains) allowed to make requests
+origins = [
+    "http://localhost:3000",       # For local-only testing
+    "http://localhost:5173",       # For local Vite testing
+    "*.ngrok.io",                # Allows all ngrok.io subdomains
+    "*.ngrok-free.dev"           # Allows all new ngrok-free.dev subdomains
+]
+
+
+
 # --- Your CORS Middleware ---
 # We are keeping this from your original file.
 # You may need to add your new Render URL to this list later.
