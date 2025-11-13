@@ -209,7 +209,7 @@ export const App = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Image-to-Music App (v2) [cite: 1]</h1>
+        <h1>Image-to-Music App</h1>
         {renderStep()}
       </header>
     </div>
