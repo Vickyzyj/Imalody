@@ -6,3 +6,5 @@ fastapi-cors
 httpx
 huggingface_hub  # <--- Add this line
 pillow         # <--- Add this line (needed to process the image)
+pytest
+pytest-mock
