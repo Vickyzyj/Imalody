@@ -33,6 +33,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- ADD THIS HEALTH CHECK ENDPOINT ---
+@app.get("/")
+async def health_check():
+    """
+    A simple endpoint to let Render's health check know the app is alive.
+    """
+    return {"status": "ok", "message": "Backend is running!"}
+# --- END OF HEALTH CHECK ---
+
+
 # --- As per plan: In-Memory Task DB (simple Python dict) ---
 tasks_db = {}
 
