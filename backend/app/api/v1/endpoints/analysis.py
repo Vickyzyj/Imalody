@@ -31,8 +31,16 @@ async def call_blip_hf_api(task_id: str, image_bytes: bytes):
             model="Salesforce/blip-image-captioning-large"
         )
 
+        # --- FIX 2: Add a check for a valid, non-empty response ---
+        if not response_list or not isinstance(response_list, list) or len(response_list) == 0:
+            raise Exception("API returned an empty or invalid response")
+
         # This model returns a list, e.g., [{'generated_text': 'a calm lake...'}]
         final_description = response_list[0]["generated_text"]
+
+        if not final_description:
+            raise Exception("API response missing 'generated_text' key")
+        # --- End of Fix 2 ---
 
         tasks_db[task_id] = {"status": "complete", "result": final_description}
 
