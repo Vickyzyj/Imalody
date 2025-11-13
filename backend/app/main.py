@@ -34,7 +34,7 @@ app.add_middleware(
 )
 
 # --- ADD THIS HEALTH CHECK ENDPOINT ---
-@app.get("/")
+@app.get("/", methods=["GET", "HEAD"])
 async def health_check():
     """
     A simple endpoint to let Render's health check know the app is alive.
