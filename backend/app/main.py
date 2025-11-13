@@ -14,8 +14,13 @@ app = FastAPI(title="Image-to-Music Mock Backend")
 origins = [
     "http://localhost:3000",       # For local-only testing
     "http://localhost:5173",       # For local Vite testing
-    "*.ngrok.io",                # Allows all ngrok.io subdomains
-    "*.ngrok-free.dev"           # Allows all new ngrok-free.dev subdomains
+    # For ngrok (older URLs)
+    "https://*.ngrok.io",
+    "http://*.ngrok.io",
+
+    # For ngrok (new .dev URLs)
+    "https://*.ngrok-free.dev",
+    "http://*.ngrok-free.dev"
 ]
 
 
@@ -97,10 +102,7 @@ def simulate_music_generation(task_id: str):
 
 # --- As per plan: API Endpoints ---
 
-@app.get("/")
-def read_root():
-    """A simple health check endpoint."""
-    return {"message": "Imalody Mock Backend is live!"}
+
 
 # Endpoint 1: Start Image Analysis
 @app.post("/analyze-image", response_model=TaskResponse, status_code=202)

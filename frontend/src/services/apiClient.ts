@@ -4,6 +4,9 @@ import axios from 'axios';
 // This is the URL from your Render deployment (Step 3) [cite: 33]
 const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:8000';
 
+
+console.log('Backend URL:', import.meta.env.VITE_BACKEND_API_URL);
+
 export const apiClient = axios.create({
   baseURL: BACKEND_URL,
 });
