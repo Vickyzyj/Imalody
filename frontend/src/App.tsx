@@ -54,8 +54,9 @@ const StatusIndicator: React.FC<{ status: string | null }> = ({ status }) => {
 const AudioPlayer: React.FC<{ base64Audio: string }> = ({ base64Audio }) => {
   // Your backend will return base64 audio [cite: 83]
   // We need to format it so the <audio> tag can play it.
-  const audioSrc = `data:audio/mpeg;base64,${base64Audio}`;
-  return <audio controls src={audioSrc} />;
+  // const audioSrc = `data:audio/mpeg;base64,${base64Audio}`;
+  // return <audio controls src={audioSrc} />;
+  return <audio controls src={base64Audio} />;
 };
 
 // --- Main Application Component ---
@@ -96,7 +97,7 @@ export const App = () => {
     setAppStep('analyzing');
     setErrorMessage(null);
     const formData = new FormData();
-    formData.append('image', file); // Input name must match your FastAPI endpoint [cite: 49]
+    formData.append('file', file); // Input name must match your FastAPI endpoint [cite: 49]
 
     try {
       // Call Endpoint 1 [cite: 48]
