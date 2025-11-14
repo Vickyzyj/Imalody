@@ -210,7 +210,7 @@ export const App = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Image-to-Music App</h1>
+        <h1>[Under Construction]</h1>
         {renderStep()}
       </header>
     </div>
