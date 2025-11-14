@@ -8,6 +8,7 @@ from huggingface_hub import InferenceClient, AsyncInferenceClient
 from PIL import Image
 import logging
 
+# Set up a logger to make sure we can see the messages in Render
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -15,38 +16,50 @@ router = APIRouter()
 client = AsyncInferenceClient()
 
 
-# --- THIS IS THE UPDATED BACKGROUND TASK ---
-async def call_blip_hf_api(task_id: str, image_bytes: bytes):
-    """Background task to call the free Serverless Inference API."""
+async def call_llava_hf_api(task_id: str, image_bytes: bytes):
+    """Background task to call the HF Serverless API for LLaVA."""
     try:
         tasks_db[task_id] = {"status": "analyzing"}
-        image = Image.open(io.BytesIO(image_bytes))
+        logger.info(f"Task {task_id}: Background task started for LLaVA.")
 
-        response_list = await client.image_to_text(
-            image_bytes,
-            model="Salesforce/blip-image-captioning-large"
+        # 1. Convert image bytes to a base64 Data URL
+        img_base64 = base64.b64encode(image_bytes).decode("utf-8")
+        data_url = f"data:image/jpeg;base64,{img_base64}"
+        logger.info(f"Task {task_id}: Image converted to data URL.")
+
+        # 2. Define text prompt
+        prompt_text = "Describe the mood, tone, and theme of this image."
+
+        # 3. Build the "messages" payload for LLaVA
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt_text},
+                    {"type": "image_url", "image_url": {"url": data_url}}
+                ]
+            }
+        ]
+        logger.info(f"Task {task_id}: LLaVA payload created.")
+
+        # 4. Call client.chat_completion
+        response = await client.chat_completion(
+            messages=messages,
+            model="llava-hf/llava-v1.6-mistral-7b-hf",  # The Pro-tier model
+            max_tokens=100
         )
+        logger.info(f"Task {task_id}: LLaVA API call successful.")
 
-        if not response_list or not isinstance(response_list, list) or len(response_list) == 0:
-            raise Exception("API returned an empty or invalid response")
-
-        final_description = response_list[0].get("generated_text")
-
-        if not final_description:
-            raise Exception("API response missing 'generated_text' key")
-
+        # 5. Extract the text response
+        final_description = response.choices[0].message.content
         tasks_db[task_id] = {"status": "complete", "result": final_description}
+        logger.info(f"Task {task_id}: Task marked complete.")
 
-    # --- THIS IS THE FIX ---
-    # We must catch BaseException to catch StopIteration
-    except BaseException as e:
-        # --- END OF FIX ---
-        # This will now log the StopIteration error
-        logger.exception(f"Task {task_id}: Image analysis background task FAILED.")
+    except BaseException as e:  # Catch BaseException to include StopIteration
+        logger.exception(f"Task {task_id}: LLaVA background task FAILED.")
         tasks_db[task_id] = {"status": "failed", "error": f"Task failed: {type(e).__name__}"}
 
 
-# --- YOUR ENDPOINT (NO CHANGES NEEDED) ---
 @router.post("/analyze-image", status_code=202)
 async def start_image_analysis(background_tasks: BackgroundTasks,
                                file: UploadFile = File(...)):
@@ -69,7 +82,7 @@ async def start_image_analysis(background_tasks: BackgroundTasks,
         raise HTTPException(status_code=500, detail=f"Server error reading file stream: {e}")
 
     logger.info(f"Task {task_id}: [DEBUG 3] Adding task to background...")
-    background_tasks.add_task(call_blip_hf_api, task_id, image_bytes)
+    background_tasks.add_task(call_llava_hf_api, task_id, image_bytes)  # Call the LLaVA function
     logger.info(f"Task {task_id}: [DEBUG 4] Task added successfully.")
 
     logger.info(f"Task {task_id}: [DEBUG 5] Returning 'Analysis started' response.")
