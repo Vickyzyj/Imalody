@@ -6,12 +6,12 @@ export default function Home() {
   
   // 1. Set this to TRUE when testing on your computer.
   // 2. Set this to FALSE when you deploy to Vercel.
-  const IS_LOCAL_DEV = false; 
+  const IS_LOCAL_DEV = true; 
 
   // When local, we use localhost:8080. When deployed, we use your Cloud Run URL.
   const API_URL = IS_LOCAL_DEV 
     ? "http://127.0.0.1:8080/upload" 
-    : "https://my-python-uploader-147110456749.us-west3.run.app";
+    : "https://my-python-uploader-147110456749.us-west3.run.app/upload";
 
   // --- CONFIGURATION END ---
 
