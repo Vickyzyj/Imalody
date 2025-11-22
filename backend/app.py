@@ -2,6 +2,40 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
+from config import project_id, bucket_name, credentials
+from imalody.store_image import upload_to_bucket, generate_v4_upload_signed_url, generate_v4_download_signed_url
+from imalody.write_lyrics import write_lyrics
+from imalody.generate_music import generate_music
+import datetime
+import tempfile
+import base64
+
+def process_image(file):
+    img_name = "imalody_load.jpeg"
+    expiration = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=15)
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp:
+        file.save(temp.name)
+        temp_path = temp.name
+
+    upload_to_bucket(bucket_name, temp_path, img_name)
+    download_url = generate_v4_download_signed_url(bucket_name, img_name, expiration)
+    # print("Download URL:", download_url)
+
+    lyrics = write_lyrics(download_url)
+    # print("Generated Lyrics:\n", lyrics)
+
+    song = generate_music(lyrics)
+
+    # Convert song to raw mp3 bytes, and then to base64 string
+    with open(song, "rb") as f:
+        song_bytes = f.read()
+
+    song_base64 = base64.b64encode(song_bytes).decode('utf-8')
+
+    return lyrics, song_base64
+
+# Initiate Flask endpoint
 app = Flask(__name__)
 
 # CRITICAL: Enable CORS.
@@ -23,8 +57,12 @@ def upload_image():
     print(f"✅ Received file: {file.filename}")
 
     # This is where you will eventually add your Google Gemini/AI code.
+    lyrics, song_base64 = process_image(file)
+
+
     return jsonify({
-        "message": f"Hello from Python! I received '{file.filename}' successfully.",
+        "lyrics": lyrics,
+        "song": song_base64,
         "status": "processed"
     })
 

@@ -1,3 +1,11 @@
 Flask==3.0.0
 flask-cors==4.0.0
 gunicorn==21.2.0
+dotenv~=0.9.9
+google-cloud-storage
+google-auth
+python-dotenv~=1.2.1
+protobuf~=6.33.0
+openai~=2.7.1
+gradio_client~=1.13.3
+gradio~=5.49.1
