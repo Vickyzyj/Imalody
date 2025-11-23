@@ -342,7 +342,7 @@ export default function Home() {
             <div className="mt-8 w-full">
               <div className="flex justify-between text-sm text-cyan-300 mb-2">
                 <span className="font-medium tracking-wide">Analyzing Visual Vibe...</span>
-                <span className="animate-pulse">{progress}s</span>
+                <span className="animate-pulse">{progress}s/60s</span>
               </div>
               <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-purple-500 to-cyan-400 w-[75%] animate-[progress_2s_ease-in-out_infinite]" />
@@ -424,7 +424,7 @@ export default function Home() {
                     />
                  </div>
 
-                 {/* Volume / Placeholder */}
+                 {/* Volume */}
                  <div className="relative group flex items-center gap-2">
                   <div 
                     className="text-white/50 hover:text-white cursor-pointer transition-colors"
