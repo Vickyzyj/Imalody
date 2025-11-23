@@ -65,6 +65,7 @@ export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [volume, setVolume] = useState(1);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -83,6 +84,12 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, [loading]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
 
   const processFile = (file: File) => {
     setSelectedImage(file);
@@ -418,9 +425,25 @@ export default function Home() {
                  </div>
 
                  {/* Volume / Placeholder */}
-                 <div className="text-white/50 hover:text-white cursor-pointer transition-colors">
-                   <VolumeIcon />
-                 </div>
+                 <div className="relative group flex items-center gap-2">
+                  <div 
+                    className="text-white/50 hover:text-white cursor-pointer transition-colors"
+                    onClick={() => setVolume(v => (v === 0 ? 1 : 0))}
+                  >
+                    <VolumeIcon />
+                  </div>
+
+                  {/* Smoothly appearing slider */}
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={volume}
+                    onChange={(e) => setVolume(parseFloat(e.target.value))}
+                    className="w-24 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  />
+                </div>
               </div>
 
               <div className="mt-4 flex justify-between text-xs text-white/40 uppercase tracking-wider border-t border-white/5 pt-4">
