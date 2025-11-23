@@ -1,5 +1,5 @@
 from config import project_id, bucket_name, credentials
-from imalody.store_image import upload_to_bucket, generate_v4_upload_signed_url, generate_v4_download_signed_url
+from backend.imalody.store_image import upload_to_bucket, generate_v4_upload_signed_url, generate_v4_download_signed_url
 from imalody.write_lyrics import write_lyrics
 from imalody.generate_music import generate_music
 import datetime

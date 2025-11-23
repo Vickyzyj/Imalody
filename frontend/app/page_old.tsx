@@ -3,21 +3,19 @@ import { useState, ChangeEvent } from 'react';
 
 export default function Home() {
   // --- CONFIGURATION START ---
-  
-  // 1. Set this to TRUE when testing on your computer.
-  // 2. Set this to FALSE when you deploy to Vercel.
-  const IS_LOCAL_DEV = true; 
+  const IS_LOCAL_DEV = true;
 
-  // When local, we use localhost:8080. When deployed, we use your Cloud Run URL.
-  const API_URL = IS_LOCAL_DEV 
-    ? "http://127.0.0.1:8080/upload" 
-    : "https://my-python-uploader-147110456749.us-west3.run.app/upload";
-
+  const API_URL = IS_LOCAL_DEV
+    ? "http://127.0.0.1:8080/upload"
+    : "https://imalody-backend-147110456749.us-west3.run.app/upload";
   // --- CONFIGURATION END ---
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [backendResponse, setBackendResponse] = useState<string>("");
+
+  const [lyrics, setLyrics] = useState<string>("");
+  const [audioUrl, setAudioUrl] = useState<string>("");
+
   const [isError, setIsError] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -26,15 +24,18 @@ export default function Home() {
     if (file) {
       setSelectedImage(file);
       setPreviewUrl(URL.createObjectURL(file));
-      setBackendResponse(""); 
+      setLyrics("");
+      setAudioUrl("");
       setIsError(false);
     }
   };
 
   const handleUpload = async () => {
     if (!selectedImage) return;
+
     setLoading(true);
-    setBackendResponse("");
+    setLyrics("");
+    setAudioUrl("");
     setIsError(false);
 
     const formData = new FormData();
@@ -42,43 +43,48 @@ export default function Home() {
 
     try {
       console.log(`Attempting to upload to: ${API_URL}`);
-      
+
       const response = await fetch(API_URL, {
         method: "POST",
         body: formData,
-        mode: 'cors',
+        mode: "cors",
       });
 
-      // Check if the response is actually JSON
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-         throw new Error("Backend did not return JSON. Did it crash or is the URL wrong?");
+        throw new Error("Backend did not return JSON.");
       }
 
       const data = await response.json();
-      
+
       if (response.ok) {
-        setBackendResponse(data.lyrics);
+        setLyrics(data.lyrics);
+
+        // Convert song base64 → playable audio URL
+        if (data.song) {
+          const url = `data:audio/mp3;base64,${data.song}`;
+          setAudioUrl(url);
+        }
+
         setIsError(false);
       } else {
-        setBackendResponse("Error: " + (data.error || "Unknown error"));
+        setLyrics("Error: " + (data.error || "Unknown error"));
         setIsError(true);
       }
     } catch (error) {
       console.error("Upload failed", error);
       setIsError(true);
 
-      // HELPFUL DEBUGGING LOGIC FOR THE USER
-      const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
-      const isTargetHttp = API_URL.startsWith('http://');
-      
+      const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+      const isTargetHttp = API_URL.startsWith("http://");
+
       if (isHttps && isTargetHttp) {
-        setBackendResponse(
-          "⚠️ SECURITY ERROR: You are running this frontend on HTTPS, but trying to connect to HTTP Localhost. Browsers block this. \n\nSOLUTION: Run 'npm run dev' locally on your machine."
+        setLyrics(
+          "⚠️ SECURITY ERROR: HTTPS frontend cannot call HTTP backend. Run `npm run dev` locally."
         );
       } else {
-        setBackendResponse(
-          `Failed to connect to ${IS_LOCAL_DEV ? "Localhost" : "Cloud Run"}. Is your Python backend running on port 8080? Check your terminal.`
+        setLyrics(
+          `Failed to connect to backend. Is Python running on port 8080? Check your terminal.`
         );
       }
     } finally {
@@ -92,6 +98,7 @@ export default function Home() {
         <h1 className="text-2xl font-bold mb-2 text-gray-800 text-center">
           {IS_LOCAL_DEV ? "Local Testing Mode" : "Cloud Run Uploader"}
         </h1>
+
         <p className="text-center text-gray-500 text-sm mb-6 break-all">
           Target: {API_URL}
         </p>
@@ -114,9 +121,9 @@ export default function Home() {
         {/* Image Preview */}
         {previewUrl && (
           <div className="mb-6 flex justify-center">
-            <img 
-              src={previewUrl} 
-              alt="Preview" 
+            <img
+              src={previewUrl}
+              alt="Preview"
               className="max-h-64 rounded-lg border border-gray-200"
             />
           </div>
@@ -127,18 +134,34 @@ export default function Home() {
           onClick={handleUpload}
           disabled={!selectedImage || loading}
           className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-colors
-            ${!selectedImage || loading 
-              ? 'bg-gray-400 cursor-not-allowed' 
-              : 'bg-blue-600 hover:bg-blue-700'}`}
+            ${
+              !selectedImage || loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
         >
           {loading ? "Sending..." : "Send to Backend"}
         </button>
 
-        {/* Backend Message Display */}
-        {backendResponse && (
-          <div className={`mt-6 p-4 rounded-lg text-sm whitespace-pre-wrap ${isError ? "bg-red-50 text-red-700 border border-red-200" : "bg-green-50 text-green-700 border border-green-200"}`}>
-            <p className="font-bold mb-1">{isError ? "Connection Error:" : "Lyrics:"}</p>
-            <p>{backendResponse}</p>
+        {/* Lyrics Display */}
+        {lyrics && (
+          <div
+            className={`mt-6 p-4 rounded-lg text-sm whitespace-pre-wrap ${
+              isError
+                ? "bg-red-50 text-red-700 border border-red-200"
+                : "bg-green-50 text-green-700 border border-green-200"
+            }`}
+          >
+            <p className="font-bold mb-1">{isError ? "Error:" : "Lyrics:"}</p>
+            <p>{lyrics}</p>
+          </div>
+        )}
+
+        {/* Audio Player */}
+        {audioUrl && !isError && (
+          <div className="mt-6 p-4 bg-gray-100 rounded-lg border border-gray-300">
+            <p className="font-bold text-gray-700 mb-2">Generated Song:</p>
+            <audio controls src={audioUrl} className="w-full" />
           </div>
         )}
       </div>
