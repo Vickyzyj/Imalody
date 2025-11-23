@@ -45,7 +45,7 @@ const SparkleIcon = () => (
 
 export default function Home() {
   // --- CONFIGURATION START ---
-  const IS_LOCAL_DEV = true;
+  const IS_LOCAL_DEV = false;
   const API_URL = IS_LOCAL_DEV
     ? "http://127.0.0.1:8080/upload"
     : "https://imalody-backend-147110456749.us-west3.run.app/upload";
