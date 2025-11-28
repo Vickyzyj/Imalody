@@ -46,7 +46,7 @@ const GALLERY_TRACKS: SongTrack[] = [
   },
   {
     id: '5',
-    title: 'Exodux',
+    title: 'Exodus',
     genre: 'Classic',
     imageUrl: 'https://storage.cloud.google.com/imalody_temp_image/Exodus.jpeg', // Texture
     audioUrl: 'https://storage.cloud.google.com/imalody_temp_image/Exodus.mp3', // Gritty
