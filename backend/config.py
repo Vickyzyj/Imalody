@@ -5,8 +5,9 @@ from google.oauth2 import service_account
 
 load_dotenv()
 
-# 1. Hugging Face Token
+# 1. Hugging Face Token and Google API Key
 hf_token = os.environ.get("HF_TOKEN")
+google_api = os.environ.get("GOOGLE_API_KEY")
 
 # 2. Project ID
 project_id = os.environ.get("project_id")

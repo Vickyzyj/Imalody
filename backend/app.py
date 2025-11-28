@@ -20,14 +20,15 @@ def process_image(file):
         temp_path = temp.name
 
     # 2. Upload the image to Google Cloud Storage Bucket
-    upload_to_bucket(bucket_name, temp_path, img_name)
+    # upload_to_bucket(bucket_name, temp_path, img_name)
 
     # 3. Generate a signed URL for the uploaded image
-    download_url = generate_v4_download_signed_url(bucket_name, img_name, expiration)
+    # download_url = generate_v4_download_signed_url(bucket_name, img_name, expiration)
     # print("Download URL:", download_url)
 
     # 4. Write lyrics using llama-4-scount-17B
-    lyrics = write_lyrics(download_url)
+    # lyrics = write_lyrics(download_url)
+    lyrics = write_lyrics(temp_path)
     # print("Generated Lyrics:\n", lyrics)
 
     # 5. Generate song using ACE-STEP model
